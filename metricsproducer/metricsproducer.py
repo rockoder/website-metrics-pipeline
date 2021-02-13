@@ -37,7 +37,7 @@ def create_message(event_time, response, regex_found):
     return message_json
 
 
-def process_response(response):
+def process_website_metric(response):
     result = pattern.search(response.text)
     return False if result is None else True
 
@@ -49,12 +49,16 @@ def collect_website_metric():
     return event_time, response
 
 
+def get_website_metric_message():
+    event_time, response = collect_website_metric()
+    regex_found = process_website_metric(response)
+    message_json = create_message(event_time, response, regex_found)
+    return message_json
+
+
 def run_producer(producer):
     while True:
-        event_time, response = collect_website_metric()
-        regex_found = process_response(response)
-
-        message_json = create_message(event_time, response, regex_found)
+        message_json = get_website_metric_message()
         producer.send(topic_name, message_json)
 
         time.sleep(poll_interval)
