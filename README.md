@@ -26,7 +26,7 @@ python metricsconsumer/metricsconsumer.py --env test &
 
 ```
 
-Logs will be generated in `logs` directory
+Logs will be generated in `logs` directory. To run the production, pass `prod` as `--env`
 
 # PyCharm Setup
 
