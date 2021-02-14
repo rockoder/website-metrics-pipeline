@@ -80,6 +80,7 @@ def main():
     consumer = get_consumer()
     db_conn = setup_db()
     atexit.register(exit_handler, consumer, db_conn)
+
     run_consumer(consumer, db_conn)
 
 

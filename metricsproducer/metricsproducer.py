@@ -81,12 +81,13 @@ def get_producer():
         ssl_keyfile='secrets/service.key',
     )
 
-    atexit.register(exit_handler, producer)
     return producer
 
 
 def main():
     producer = get_producer()
+    atexit.register(exit_handler, producer)
+
     run_producer(producer)
 
 
