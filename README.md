@@ -1,5 +1,6 @@
 # Website Metrics Pipeline
 
+![](docs/arch-diag.svg)
 
 # Most Common Command
 
