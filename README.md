@@ -28,3 +28,6 @@ python metricsconsumer/metricsconsumer.py --env test &
 
 Logs will be generated in logs directory
 
+# PyCharm Setup
+
+If you prefer PyCharm, all the project and run configuration files are committed to the .idea directory.
