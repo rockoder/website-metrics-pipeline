@@ -8,11 +8,9 @@ import argparse
 import requests
 from kafka import KafkaProducer
 
-# todo: take configs from command line
-# todo: separate test and prod env configs
-# todo: separate secretes
 # todo: exception handling and flushing on error and also on exit
 # todo: add logging
+# todo: packaging/setup
 
 
 def create_message(event_time, response, regex_found):
@@ -99,17 +97,14 @@ def get_config_file_name():
     return 'config/config_' + args.env + '.ini'
 
 
-def load_config(config_file_name):
+def init(config_file_name):
     config = configparser.ConfigParser()
     config.read(config_file_name)
+    pattern = re.compile(config['website']['regex_pattern'])
 
-    return config
+    return config, pattern
 
 
 if __name__ == "__main__":
-    config_file_name = get_config_file_name()
-
-    config = load_config(config_file_name)
-    pattern = re.compile(config['website']['regex_pattern'])
-
+    config, pattern = init(get_config_file_name())
     main()

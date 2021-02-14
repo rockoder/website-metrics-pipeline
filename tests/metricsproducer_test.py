@@ -12,8 +12,7 @@ class TestMetricsProducer(unittest.TestCase):
     mock_url = 'https://httpbin.org/get'
 
     def setUp(self):
-        metricsproducer.config = metricsproducer.load_config('config/config_test.ini')
-        metricsproducer.pattern = re.compile(metricsproducer.config['website']['regex_pattern'])
+        metricsproducer.config, metricsproducer.pattern = metricsproducer.init('config/config_test.ini')
 
         self.mock_response_success = {
             'args': {},
@@ -43,6 +42,20 @@ class TestMetricsProducer(unittest.TestCase):
 
         assert metric_message['url'] == self.mock_metric_message['url']
         assert metric_message['regex_found'] == self.mock_metric_message['regex_found']
+
+    @responses.activate
+    @mock.patch('time.time', mock.MagicMock(return_value=mock_time_now))
+    def test_collect_metric_pattern_fail(self):
+        metricsproducer.pattern = re.compile('invalid_pattern')
+        metricsproducer.config['website']['regex_pattern'] = 'invalid_pattern'
+
+        responses.add(responses.GET, self.mock_url, json=json.dumps(self.mock_response_success), status=200)
+        metric_message_json = metricsproducer.get_website_metric_message()
+
+        metric_message = json.loads(metric_message_json)
+
+        assert metric_message['url'] == self.mock_metric_message['url']
+        assert not metric_message['regex_found']
 
 
 if __name__ == '__main__':
