@@ -1,3 +1,7 @@
+# Problem Statement
+
+Refer [pdf](docs/Engineering_Manager_-_Berlin.pdf) for the details.
+
 # Website Metrics Pipeline
 
 ![](docs/arch-diag.png)
