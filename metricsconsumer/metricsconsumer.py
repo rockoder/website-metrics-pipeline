@@ -11,6 +11,8 @@ import psycopg2
 
 create_table_sql = 'CREATE TABLE IF NOT EXISTS website_metrics (event_time BIGINT PRIMARY KEY, metrics JSONB)'
 select_count_table_sql = 'SELECT COUNT(*) FROM website_metrics'
+
+# Inserts on same timestamp will be ignored since the timestamp is already in milliseconds
 insert_table_sql = 'INSERT INTO website_metrics VALUES (%s, %s) ON CONFLICT DO NOTHING'
 
 

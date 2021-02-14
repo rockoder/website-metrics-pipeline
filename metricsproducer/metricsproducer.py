@@ -9,8 +9,6 @@ import logging
 import requests
 from kafka import KafkaProducer
 
-# todo: packaging/setup
-
 
 def create_message(event_time, response, regex_found):
     website_config = config['website']
