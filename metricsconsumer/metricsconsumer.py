@@ -2,6 +2,8 @@ import json
 import atexit
 import configparser
 import argparse
+import time
+import logging
 
 from kafka import KafkaConsumer
 from psycopg2.extras import RealDictCursor
@@ -38,14 +40,17 @@ def get_total_metrics(db_conn):
 
 
 def consume_message(consumer, db_conn, cursor):
-    raw_msgs = consumer.poll(timeout_ms=int(config['kafka']['consumer_poll_timeout']))
-    for tp, messages in raw_msgs.items():
-        for message in messages:
-            print(message.value.decode('utf-8'))
-            msg = json.loads(message.value.decode('utf-8'))
-            cursor.execute(insert_table_sql, (str(msg['event_time']), message.value.decode('utf-8')))
-    db_conn.commit()
-    consumer.commit()
+    try:
+        raw_msgs = consumer.poll(timeout_ms=int(config['kafka']['consumer_poll_timeout']))
+
+        for tp, messages in raw_msgs.items():
+            for message in messages:
+                logging.debug(message.value.decode('utf-8'))
+                msg = json.loads(message.value.decode('utf-8'))
+                cursor.execute(insert_table_sql, (str(msg['event_time']), message.value.decode('utf-8')))
+    finally:
+        db_conn.commit()
+        consumer.commit()
 
 
 def run_consumer(consumer, db_conn):
@@ -56,7 +61,7 @@ def run_consumer(consumer, db_conn):
 
 
 def exit_handler(consumer, db_conn):
-    print('Closing db connection and kafka consumer before exiting the program')
+    logging.info('Closing db connection and kafka consumer before exiting the program')
     db_conn.commit()
     db_conn.close()
     consumer.close()
@@ -99,9 +104,16 @@ def get_config_file_name():
 
 
 def init(config_file_name):
+    logfile = "logs/consumer_{}.log".format(time.time())
+    logging.basicConfig(filename=logfile,
+                        format='%(asctime)s - %(thread)-20d - %(filename)-30s - %(lineno)-4d - '
+                               '%(funcName)-40s - %(levelname)s - %(message)s',
+                        level=logging.INFO)
+
     config = configparser.ConfigParser()
     config.read(config_file_name)
 
+    logging.info('Loaded config from:%s', config_file_name)
     return config
 
 

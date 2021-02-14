@@ -4,12 +4,11 @@ import json
 import atexit
 import configparser
 import argparse
+import logging
 
 import requests
 from kafka import KafkaProducer
 
-# todo: exception handling and flushing on error and also on exit
-# todo: add logging
 # todo: packaging/setup
 
 
@@ -27,7 +26,7 @@ def create_message(event_time, response, regex_found):
 
     message_json = json.dumps(message).encode("utf-8")
 
-    print(message_json)
+    logging.debug(message_json)
     return message_json
 
 
@@ -38,9 +37,14 @@ def process_website_metric(response):
 
 def collect_website_metric():
     event_time = int(time.time() * int(config['website']['time_precision']))
-    response = requests.get(config['website']['url'], timeout=int(config['website']['requests_timeout']))
 
-    return event_time, response
+    for attempt in range(3):
+        try:
+            response = requests.get(config['website']['url'], timeout=int(config['website']['requests_timeout']))
+            return event_time, response
+        except Exception as err:
+            logging.error('Attempt {} failed while connecting to the website:{}', attempt, err)
+            time.sleep(1)
 
 
 def get_website_metric_message():
@@ -62,7 +66,7 @@ def run_producer(producer):
 
 
 def exit_handler(producer):
-    print('Flushing producer before exiting the program')
+    logging.info('Flushing producer before exiting the program')
     producer.flush()
 
 
@@ -98,10 +102,17 @@ def get_config_file_name():
 
 
 def init(config_file_name):
+    logfile = "logs/producer_{}.log".format(time.time())
+    logging.basicConfig(filename=logfile,
+                        format='%(asctime)s - %(thread)-20d - %(filename)-30s - %(lineno)-4d - '
+                               '%(funcName)-40s - %(levelname)s - %(message)s',
+                        level=logging.INFO)
+
     config = configparser.ConfigParser()
     config.read(config_file_name)
     pattern = re.compile(config['website']['regex_pattern'])
 
+    logging.info('Loaded config from:%s', config_file_name)
     return config, pattern
 
 
