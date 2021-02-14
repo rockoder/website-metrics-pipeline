@@ -31,3 +31,8 @@ Logs will be generated in `logs` directory. To run the production, pass `prod` a
 # PyCharm Setup
 
 If you prefer PyCharm, all the project and run configuration files are committed to the .idea directory.
+
+# Notes, Assumptions and TODOs
+
+1. Secrets has been committed to the repo for simplicity. Ideally these should not be here and should be managed through proper secrets manager.
+1. In general more work can be done of deployment pipeline. Ex: We assume the postgresql client library is already present on the system which is required by psycopg2. This step can be better automated by using containers.
