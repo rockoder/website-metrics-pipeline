@@ -56,11 +56,14 @@ def get_website_metric_message():
     return message_json
 
 
+def produce_metrics(producer):
+    message_json = get_website_metric_message()
+    producer.send(topic_name, message_json)
+
+
 def run_producer(producer):
     while True:
-        message_json = get_website_metric_message()
-        producer.send(topic_name, message_json)
-
+        produce_metrics(producer)
         time.sleep(poll_interval)
 
 
