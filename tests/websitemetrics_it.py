@@ -1,4 +1,5 @@
 import unittest
+import re
 import metricsproducer
 import metricsconsumer
 from psycopg2.extras import RealDictCursor
@@ -7,6 +8,11 @@ from psycopg2.extras import RealDictCursor
 class TestMetricsProducer(unittest.TestCase):
 
     def setUp(self):
+        metricsproducer.config = metricsproducer.load_config('config/config_test.ini')
+        metricsproducer.pattern = re.compile(metricsproducer.config['website']['regex_pattern'])
+
+        metricsconsumer.config = metricsconsumer.load_config('config/config_test.ini')
+
         self.producer = metricsproducer.get_producer()
         self.consumer = metricsconsumer.get_consumer()
         self.db_conn = metricsconsumer.setup_db()

@@ -99,11 +99,17 @@ def get_config_file_name():
     return 'config/config_' + args.env + '.ini'
 
 
+def load_config(config_file_name):
+    config = configparser.ConfigParser()
+    config.read(config_file_name)
+
+    return config
+
+
 if __name__ == "__main__":
     config_file_name = get_config_file_name()
 
-    config = configparser.ConfigParser()
-    config.read(config_file_name)
+    config = load_config(config_file_name)
     pattern = re.compile(config['website']['regex_pattern'])
 
     main()
